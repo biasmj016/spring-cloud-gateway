@@ -1,7 +1,36 @@
 server:
   port: 8761
 
+spring:
+  application:
+    name: DISCOVERY
+
 eureka:
+  server:
+    enable-self-preservation: true
+  instance:
+    instance-id: discovery
+    hostname: discovery
+    ip-address: 127.0.0.1
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 0
   client:
-    register-with-eureka: false
-    fetch-registry: false
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://127.0.0.1:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    resume.enabled: true
+    pause.enabled: true
+    restart:
+      access:
+    shutdown:
+      access:
