@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: example-server
+
+server:
+  port: 8089
+
+eureka:
+  instance:
+    instance-id: example-server
+    hostname: example-server
+    ip-address: 127.0.0.1
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    health:
+      show-details: always
+    shutdown:
+      enabled: false
+    restart:
+      access:
