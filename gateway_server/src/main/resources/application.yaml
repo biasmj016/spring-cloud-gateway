@@ -1,11 +1,70 @@
-server:
-  port: 8080
-
 spring:
   application:
-    name: gateway-service
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: example-server-route
+          uri: lb://EXAMPLE-SERVER
+          predicates:
+            - Path=/example/**
+          filters:
+            - RewritePath=/example/(?<segment>.*), /${segment}
+            - name: CircuitBreaker
+              args:
+                name: circuit-breaker-example
+                fallbackUri: forward:/fallback/example
+                filter:
+                  - AddRequestHeader=X-Request-Server, example-server-api
+
+        - id: example-server-b-route
+          uri: lb://EXAMPLE-SERVER-B
+          predicates:
+            - Path=/example-b/**
+          filters:
+            - RewritePath=/example-b/(?<segment>.*), /${segment}
+            - name: CircuitBreaker
+              args:
+                name: circuit-breaker-example-b
+                fallbackUri: forward:/fallback/example-b
+                filter:
+                  - AddRequestHeader=X-Request-Server, example-server-b-api
 
 eureka:
   client:
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://127.0.0.1:8761/eureka/
+
+resilience4j:
+  circuit-breaker:
+    configs:
+      default:
+        minimumNumberOfCalls: 1
+        failureRateThreshold: 1
+        waitDurationInOpenState: 10s
+        slowCallRateThreshold: 10
+        slowCallDurationThreshold: 5s
+        permittedNumberOfCallsInHalfOpenState: 1
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    circuit-breakers:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+    resume.enabled: true
+    pause.enabled: true
+    restart:
+      access:
+    shutdown:
+      access:
